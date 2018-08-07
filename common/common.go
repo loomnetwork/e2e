@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path"
 	"path/filepath"
@@ -48,9 +49,17 @@ func NewConfig(name, testFile, genesisTmpl string, validators, account int) (*li
 		}
 	}
 
-	loompathAbs, err := filepath.Abs(LoomPath)
-	if err != nil {
-		return nil, err
+	var loompathAbs string
+	if path.IsAbs(LoomPath) {
+		loompathAbs, err = filepath.Abs(LoomPath)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		loompathAbs, err = exec.LookPath(LoomPath)
+		if err != nil {
+			return nil, err
+		}
 	}
 	contractdirAbs, err := filepath.Abs(ContractDir)
 	if err != nil {
