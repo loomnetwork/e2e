@@ -1,13 +1,10 @@
-package main
+package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 )
 
-func main() {
+func Execute() error {
 	rootCmd := &cobra.Command{
 		Use:   "e2e-test",
 		Short: "e2e-test utility",
@@ -19,8 +16,5 @@ func main() {
 	rootCmd.AddCommand(newGenerateCommand())
 	rootCmd.AddCommand(newPubKeyCommand())
 
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
-	}
+	return rootCmd.Execute()
 }
