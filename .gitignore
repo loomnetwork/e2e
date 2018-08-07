@@ -13,7 +13,6 @@
 *.out
 
 # Gopath
-/vendor
 
 # App specific
 /e2e-test
