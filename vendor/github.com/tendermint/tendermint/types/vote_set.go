@@ -8,7 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	cmn "github.com/tendermint/tmlibs/common"
+	cmn "github.com/tendermint/tendermint/libs/common"
 )
 
 // UNSTABLE
@@ -179,7 +179,7 @@ func (voteSet *VoteSet) addVote(vote *Vote) (added bool, err error) {
 
 	// If we already know of this vote, return false.
 	if existing, ok := voteSet.getVote(valIndex, blockKey); ok {
-		if existing.Signature.Equals(vote.Signature) {
+		if bytes.Equal(existing.Signature, vote.Signature) {
 			return false, nil // duplicate
 		}
 		return false, errors.Wrapf(ErrVoteNonDeterministicSignature, "Existing vote: %v; New vote: %v", existing, vote)

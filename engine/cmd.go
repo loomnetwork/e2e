@@ -17,7 +17,6 @@ import (
 
 	"github.com/loomnetwork/e2e/lib"
 	"github.com/loomnetwork/e2e/node"
-	abci "github.com/tendermint/abci/types"
 )
 
 type engineCmd struct {
@@ -78,7 +77,12 @@ func (e *engineCmd) Run(ctx context.Context, eventC chan *node.Event) error {
 					JSONRPC string `json:"jsonrpc"`
 					ID      string `json:"id"`
 					Result  struct {
-						Response abci.ResponseInfo `json:"response"`
+						Response struct {
+							Data             string `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+							Version          string `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
+							LastBlockHeight  int64  `protobuf:"varint,3,opt,name=last_block_height,json=lastBlockHeight,proto3" json:"last_block_height,omitempty"`
+							LastBlockAppHash []byte `protobuf:"bytes,4,opt,name=last_block_app_hash,json=lastBlockAppHash,proto3" json:"last_block_app_hash,omitempty"`
+						} `json:"response"`
 					} `json:"result"`
 				}{}
 				err = json.NewDecoder(resp.Body).Decode(&info)

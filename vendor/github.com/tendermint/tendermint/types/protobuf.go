@@ -6,8 +6,10 @@ import (
 	"reflect"
 	"time"
 
-	abci "github.com/tendermint/abci/types"
-	crypto "github.com/tendermint/go-crypto"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 //-------------------------------------------------------
@@ -36,7 +38,7 @@ func (tm2pb) Header(header *Header) abci.Header {
 		ChainID: header.ChainID,
 		Height:  header.Height,
 
-		Time:     header.Time.Unix(),
+		Time:     header.Time,
 		NumTxs:   int32(header.NumTxs), // XXX: overflow
 		TotalTxs: header.TotalTxs,
 
@@ -45,6 +47,13 @@ func (tm2pb) Header(header *Header) abci.Header {
 		AppHash:        header.AppHash,
 
 		// Proposer: TODO
+	}
+}
+
+func (tm2pb) ValidatorWithoutPubKey(val *Validator) abci.Validator {
+	return abci.Validator{
+		Address: val.PubKey.Address(),
+		Power:   val.VotingPower,
 	}
 }
 
@@ -58,15 +67,15 @@ func (tm2pb) Validator(val *Validator) abci.Validator {
 }
 
 // XXX: panics on nil or unknown pubkey type
-// TODO: add cases when new pubkey types are added to go-crypto
+// TODO: add cases when new pubkey types are added to crypto
 func (tm2pb) PubKey(pubKey crypto.PubKey) abci.PubKey {
 	switch pk := pubKey.(type) {
-	case crypto.PubKeyEd25519:
+	case ed25519.PubKeyEd25519:
 		return abci.PubKey{
 			Type: ABCIPubKeyTypeEd25519,
 			Data: pk[:],
 		}
-	case crypto.PubKeySecp256k1:
+	case secp256k1.PubKeySecp256k1:
 		return abci.PubKey{
 			Type: ABCIPubKeyTypeSecp256k1,
 			Data: pk[:],
@@ -78,7 +87,7 @@ func (tm2pb) PubKey(pubKey crypto.PubKey) abci.PubKey {
 
 // XXX: panics on nil or unknown pubkey type
 func (tm2pb) Validators(vals *ValidatorSet) []abci.Validator {
-	validators := make([]abci.Validator, len(vals.Validators))
+	validators := make([]abci.Validator, vals.Size())
 	for i, val := range vals.Validators {
 		validators[i] = TM2PB.Validator(val)
 	}
@@ -127,9 +136,9 @@ func (tm2pb) Evidence(ev Evidence, valSet *ValidatorSet, evTime time.Time) abci.
 
 	return abci.Evidence{
 		Type:             evType,
-		Validator:        TM2PB.Validator(val),
+		Validator:        TM2PB.ValidatorWithoutPubKey(val),
 		Height:           ev.Height(),
-		Time:             evTime.Unix(),
+		Time:             evTime,
 		TotalVotingPower: valSet.TotalVotingPower(),
 	}
 }
@@ -153,7 +162,7 @@ var PB2TM = pb2tm{}
 type pb2tm struct{}
 
 func (pb2tm) PubKey(pubKey abci.PubKey) (crypto.PubKey, error) {
-	// TODO: define these in go-crypto and use them
+	// TODO: define these in crypto and use them
 	sizeEd := 32
 	sizeSecp := 33
 	switch pubKey.Type {
@@ -161,14 +170,14 @@ func (pb2tm) PubKey(pubKey abci.PubKey) (crypto.PubKey, error) {
 		if len(pubKey.Data) != sizeEd {
 			return nil, fmt.Errorf("Invalid size for PubKeyEd25519. Got %d, expected %d", len(pubKey.Data), sizeEd)
 		}
-		var pk crypto.PubKeyEd25519
+		var pk ed25519.PubKeyEd25519
 		copy(pk[:], pubKey.Data)
 		return pk, nil
 	case ABCIPubKeyTypeSecp256k1:
 		if len(pubKey.Data) != sizeSecp {
 			return nil, fmt.Errorf("Invalid size for PubKeyEd25519. Got %d, expected %d", len(pubKey.Data), sizeSecp)
 		}
-		var pk crypto.PubKeySecp256k1
+		var pk secp256k1.PubKeySecp256k1
 		copy(pk[:], pubKey.Data)
 		return pk, nil
 	default:
