@@ -51,8 +51,17 @@
     "sortkeys",
     "types"
   ]
-  revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
-  version = "v1.0.0"
+  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
+  version = "v1.1.1"
+
+[[projects]]
+  name = "github.com/golang/protobuf"
+  packages = [
+    "proto",
+    "ptypes/timestamp"
+  ]
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -85,12 +94,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  name = "github.com/tendermint/abci"
-  packages = ["types"]
-  revision = "ebee2fe114020aa49c70bbbae50b7079fc7e7b90"
-  version = "v0.11.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/tendermint/ed25519"
   packages = [
@@ -103,34 +106,27 @@
 [[projects]]
   name = "github.com/tendermint/go-amino"
   packages = ["."]
-  revision = "ed62928576cfcaf887209dc96142cd79cdfff389"
-  version = "0.9.9"
-
-[[projects]]
-  name = "github.com/tendermint/go-crypto"
-  packages = ["."]
-  revision = "915416979bf70efa4bcbf1c6cd5d64c5fff9fc19"
-  version = "v0.6.2"
+  revision = "2106ca61d91029c931fd54968c2bb02dc96b1412"
+  version = "0.10.1"
 
 [[projects]]
   name = "github.com/tendermint/tendermint"
   packages = [
+    "abci/types",
+    "crypto",
+    "crypto/ed25519",
+    "crypto/encoding/amino",
+    "crypto/merkle",
+    "crypto/secp256k1",
+    "crypto/tmhash",
+    "libs/common",
+    "libs/log",
     "libs/pubsub",
     "libs/pubsub/query",
     "types"
   ]
-  revision = "27bd1deabe4ba6a2d9b463b8f3e3f1e31b993e61"
-  version = "v0.20.0"
-
-[[projects]]
-  name = "github.com/tendermint/tmlibs"
-  packages = [
-    "common",
-    "log",
-    "merkle"
-  ]
-  revision = "692f1d86a6e2c0efa698fd1e4541b68c74ffaf38"
-  version = "v0.8.4"
+  revision = "013b9cef642f875634c614019ab13b17570778ad"
+  version = "v0.23.0"
 
 [[projects]]
   name = "golang.org/x/net"
@@ -146,6 +142,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "10734bf59831d4d67f6271225aba59340018b5c360c3e47066a4f4dcbe1bf030"
+  inputs-digest = "87f397e4790c7432065619dbedb7dea17d116fa2f2c4071ffc56a0ad974fe7ae"
   solver-name = "gps-cdcl"
   solver-version = 1
