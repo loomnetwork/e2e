@@ -57,6 +57,7 @@ func (e *engineCmd) Run(ctx context.Context, eventC chan *node.Event) error {
 		if n.Dir != "" {
 			dir = n.Dir
 		}
+
 		base := buf.String()
 		makeTestFiles(n.Datafiles, dir)
 		// special command to check app hash
@@ -159,7 +160,7 @@ func (e *engineCmd) Run(ctx context.Context, eventC chan *node.Event) error {
 					}
 				}
 			} else {
-				args := []string{buf.String()}
+				args := strings.Split(buf.String(), " ")
 				if len(args) == 0 {
 					return errors.New("missing command")
 				}
