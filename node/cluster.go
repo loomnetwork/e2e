@@ -104,28 +104,30 @@ func CreateCluster(nodes []*Node, account []*Account) error {
 		node.Peers = strings.Join(peers, ",")
 		node.PersistentPeers = strings.Join(persistentPeers, ",")
 
-		rpcProxyPort := idToProxyPort[node.ID]
 		rpcPort := idToRPCPort[node.ID]
+		proxyAppPort := idToProxyPort[node.ID]
 		var config = struct {
 			QueryServerHost    string
 			Peers              string
 			PersistentPeers    string
 			RPCProxyPort       int32
 			RPCPort            int32
-			RPCListenAddress   string
 			BlockchainLogLevel string
 			LogAppDb           bool
 			LogDestination     string
+			RPCListenAddress   string
+			RPCBindAddress     string
 		}{
 			QueryServerHost:    fmt.Sprintf("tcp://127.0.0.1:%d", portGen.Next()),
 			Peers:              strings.Join(peers, ","),
 			PersistentPeers:    strings.Join(persistentPeers, ","),
-			RPCProxyPort:       int32(rpcProxyPort),
+			RPCProxyPort:       int32(proxyAppPort),
 			RPCPort:            int32(rpcPort),
-			RPCListenAddress:   fmt.Sprintf("tcp://127.0.0.1:%d", rpcPort),
 			BlockchainLogLevel: node.LogLevel,
 			LogDestination:     node.LogDestination,
 			LogAppDb:           node.LogAppDb,
+			RPCListenAddress:   fmt.Sprintf("tcp://127.0.0.1:%d", rpcPort),
+			RPCBindAddress:     fmt.Sprintf("tcp://127.0.0.1:%d", proxyAppPort),
 		}
 
 		buf := new(bytes.Buffer)
