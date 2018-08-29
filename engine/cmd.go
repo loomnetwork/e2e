@@ -166,7 +166,6 @@ func (e *engineCmd) Run(ctx context.Context, eventC chan *node.Event) error {
 				if len(args) == 0 {
 					return errors.New("missing command")
 				}
-				fmt.Printf("---> args: %v\n", args)
 
 				// Make sure we have query and rpc endpoint as a default.
 				// If there is no /query and /rpc, pick the first default one and append to args.
