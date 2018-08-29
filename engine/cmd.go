@@ -12,8 +12,10 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"text/scanner"
 	"text/template"
 	"time"
+	"unicode"
 
 	"github.com/loomnetwork/e2e/lib"
 	"github.com/loomnetwork/e2e/node"
@@ -111,7 +113,7 @@ func (e *engineCmd) Run(ctx context.Context, eventC chan *node.Event) error {
 			// check all  the nodes
 			if n.All {
 				for j, v := range e.conf.Nodes {
-					args := strings.Split(base, " ")
+					args := scanCmdArg(base)
 					if len(args) == 0 {
 						return errors.New("missing command")
 					}
@@ -160,10 +162,11 @@ func (e *engineCmd) Run(ctx context.Context, eventC chan *node.Event) error {
 					}
 				}
 			} else {
-				args := strings.Split(buf.String(), " ")
+				args := scanCmdArg(base)
 				if len(args) == 0 {
 					return errors.New("missing command")
 				}
+				fmt.Printf("---> args: %v\n", args)
 
 				// Make sure we have query and rpc endpoint as a default.
 				// If there is no /query and /rpc, pick the first default one and append to args.
@@ -225,6 +228,24 @@ func (e *engineCmd) Run(ctx context.Context, eventC chan *node.Event) error {
 	}
 
 	return nil
+}
+
+func scanCmdArg(in string) (out []string) {
+	var s scanner.Scanner
+	s.Init(strings.NewReader(in))
+	// hack to allow _ / - . : to be in part of the command
+	s.IsIdentRune = func(ch rune, i int) bool {
+		return ch == '_' || ch == '/' || ch == '-' || ch == '.' || ch == ':' || unicode.IsLetter(ch) || unicode.IsDigit(ch) && i > 0
+	}
+	for tok := s.Scan(); tok != scanner.EOF; tok = s.Scan() {
+		txt := s.TokenText()
+		switch tok {
+		case scanner.Char:
+			txt = strings.Trim(txt, "'")
+		}
+		out = append(out, txt)
+	}
+	return
 }
 
 func makeTestFiles(filesInfo []lib.Datafile, dir string) error {
