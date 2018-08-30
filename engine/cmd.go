@@ -68,7 +68,7 @@ func (e *engineCmd) Run(ctx context.Context, eventC chan *node.Event) error {
 			time.Sleep(time.Second * 1)
 			fmt.Printf("--> run all: %v \n", "checkapphash")
 			var apphash = make(map[string]struct{})
-			var lastBlockHeight int64
+			var lastBlockHeight string
 			for _, v := range e.conf.Nodes {
 				u := fmt.Sprintf("%s/abci_info", v.RPCAddress)
 				resp, err := http.Get(u)
@@ -83,7 +83,7 @@ func (e *engineCmd) Run(ctx context.Context, eventC chan *node.Event) error {
 						Response struct {
 							Data             string `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 							Version          string `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-							LastBlockHeight  int64  `protobuf:"varint,3,opt,name=last_block_height,json=lastBlockHeight,proto3" json:"last_block_height,omitempty"`
+							LastBlockHeight  string `protobuf:"varint,3,opt,name=last_block_height,json=lastBlockHeight,proto3" json:"last_block_height,omitempty"`
 							LastBlockAppHash []byte `protobuf:"bytes,4,opt,name=last_block_app_hash,json=lastBlockAppHash,proto3" json:"last_block_app_hash,omitempty"`
 						} `json:"response"`
 					} `json:"result"`
@@ -92,7 +92,7 @@ func (e *engineCmd) Run(ctx context.Context, eventC chan *node.Event) error {
 				if err != nil {
 					return err
 				}
-				if lastBlockHeight == 0 {
+				if lastBlockHeight == "" {
 					lastBlockHeight = info.Result.Response.LastBlockHeight
 				}
 				if lastBlockHeight == info.Result.Response.LastBlockHeight {
