@@ -1,6 +1,8 @@
 package types
 
-import "time"
+import (
+	tmtime "github.com/tendermint/tendermint/types/time"
+)
 
 func MakeCommit(blockID BlockID, height int64, round int,
 	voteSet *VoteSet,
@@ -14,9 +16,9 @@ func MakeCommit(blockID BlockID, height int64, round int,
 			ValidatorIndex:   i,
 			Height:           height,
 			Round:            round,
-			Type:             VoteTypePrecommit,
+			Type:             PrecommitType,
 			BlockID:          blockID,
-			Timestamp:        time.Now().UTC(),
+			Timestamp:        tmtime.Now(),
 		}
 
 		_, err := signAddVote(validators[i], vote, voteSet)
