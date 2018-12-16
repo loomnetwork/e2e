@@ -55,7 +55,7 @@ type VoteSet struct {
 	chainID string
 	height  int64
 	round   int
-	type_   byte
+	type_   SignedMsgType
 	valSet  *ValidatorSet
 
 	mtx           sync.Mutex
@@ -68,7 +68,7 @@ type VoteSet struct {
 }
 
 // Constructs a new VoteSet struct used to accumulate votes for given height/round.
-func NewVoteSet(chainID string, height int64, round int, type_ byte, valSet *ValidatorSet) *VoteSet {
+func NewVoteSet(chainID string, height int64, round int, type_ SignedMsgType, valSet *ValidatorSet) *VoteSet {
 	if height == 0 {
 		cmn.PanicSanity("Cannot make VoteSet for height == 0, doesn't make sense.")
 	}
@@ -109,7 +109,7 @@ func (voteSet *VoteSet) Type() byte {
 	if voteSet == nil {
 		return 0x00
 	}
-	return voteSet.type_
+	return byte(voteSet.type_)
 }
 
 func (voteSet *VoteSet) Size() int {
@@ -158,7 +158,7 @@ func (voteSet *VoteSet) addVote(vote *Vote) (added bool, err error) {
 	if (vote.Height != voteSet.height) ||
 		(vote.Round != voteSet.round) ||
 		(vote.Type != voteSet.type_) {
-		return false, errors.Wrapf(ErrVoteUnexpectedStep, "Got %d/%d/%d, expected %d/%d/%d",
+		return false, errors.Wrapf(ErrVoteUnexpectedStep, "Expected %d/%d/%d, but got %d/%d/%d",
 			voteSet.height, voteSet.round, voteSet.type_,
 			vote.Height, vote.Round, vote.Type)
 	}
@@ -170,7 +170,7 @@ func (voteSet *VoteSet) addVote(vote *Vote) (added bool, err error) {
 			"Cannot find validator %d in valSet of size %d", valIndex, voteSet.valSet.Size())
 	}
 
-	// Ensure that the signer has the right address
+	// Ensure that the signer has the right address.
 	if !bytes.Equal(valAddr, lookupAddr) {
 		return false, errors.Wrapf(ErrVoteInvalidValidatorAddress,
 			"vote.ValidatorAddress (%X) does not match address (%X) for vote.ValidatorIndex (%d)\nEnsure the genesis file is correct across all validators.",
@@ -190,7 +190,7 @@ func (voteSet *VoteSet) addVote(vote *Vote) (added bool, err error) {
 		return false, errors.Wrapf(err, "Failed to verify vote with ChainID %s and PubKey %s", voteSet.chainID, val.PubKey)
 	}
 
-	// Add vote and get conflicting vote if any
+	// Add vote and get conflicting vote if any.
 	added, conflicting := voteSet.addVerifiedVote(vote, blockKey, val.VotingPower)
 	if conflicting != nil {
 		return added, NewConflictingVoteError(val, conflicting, vote)
@@ -201,7 +201,7 @@ func (voteSet *VoteSet) addVote(vote *Vote) (added bool, err error) {
 	return added, nil
 }
 
-// Returns (vote, true) if vote exists for valIndex and blockKey
+// Returns (vote, true) if vote exists for valIndex and blockKey.
 func (voteSet *VoteSet) getVote(valIndex int, blockKey string) (vote *Vote, ok bool) {
 	if existing := voteSet.votes[valIndex]; existing != nil && existing.BlockID.Key() == blockKey {
 		return existing, true
@@ -381,7 +381,7 @@ func (voteSet *VoteSet) IsCommit() bool {
 	if voteSet == nil {
 		return false
 	}
-	if voteSet.type_ != VoteTypePrecommit {
+	if voteSet.type_ != PrecommitType {
 		return false
 	}
 	voteSet.mtx.Lock()
@@ -529,8 +529,8 @@ func (voteSet *VoteSet) sumTotalFrac() (int64, int64, float64) {
 // Commit
 
 func (voteSet *VoteSet) MakeCommit() *Commit {
-	if voteSet.type_ != VoteTypePrecommit {
-		cmn.PanicSanity("Cannot MakeCommit() unless VoteSet.Type is VoteTypePrecommit")
+	if voteSet.type_ != PrecommitType {
+		cmn.PanicSanity("Cannot MakeCommit() unless VoteSet.Type is PrecommitType")
 	}
 	voteSet.mtx.Lock()
 	defer voteSet.mtx.Unlock()
