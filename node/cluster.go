@@ -101,7 +101,7 @@ func CreateCluster(nodes []*Node, account []*Account) error {
 		str = strings.Replace(str, `timeout_prevote_delta = "500ms"`, `timeout_prevote_delta = "250ms"`, -1)
 		str = strings.Replace(str, `timeout_precommit = "1s"`, `timeout_precommit = "500ms"`, -1)
 		str = strings.Replace(str, `timeout_precommit_delta = "500ms"`, `timeout_precommit_delta = "250ms"`, -1)
-		str = strings.Replace(str, `timeout_commit = "1s"`, `timeout_commit = "100ms"`, -1)
+		str = strings.Replace(str, `timeout_commit = "1s"`, `timeout_commit = "500ms"`, -1)
 
 		err = ioutil.WriteFile(configPath, []byte(str), 0644)
 		if err != nil {
