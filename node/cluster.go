@@ -88,13 +88,20 @@ func CreateCluster(nodes []*Node, account []*Account) error {
 		str = strings.Replace(str, "tcp://127.0.0.1:46658", proxyAppPortAddr, -1)
 		str = strings.Replace(str, "tcp://127.0.0.1:26658", proxyAppPortAddr, -1) //Temp here cause now tendermint is 2xx range
 
-		// adjust p2p
-		str = strings.Replace(str, `flush_throttle_timeout = "100ms"`, `flush_throttle_timeout = "10ms"`, -1)
-		str = strings.Replace(str, `max_packet_msg_payload_size = 1024`, `max_packet_msg_payload_size = 10240`, -1)
-		str = strings.Replace(str, `send_rate = 5120000`, `send_rate = 20000000`, -1)
-		str = strings.Replace(str, `recv_rate = 5120000`, `recv_rate = 20000000`, -1)
+		// // adjust p2p
+		// str = strings.Replace(str, `flush_throttle_timeout = "100ms"`, `flush_throttle_timeout = "10ms"`, -1)
+		// str = strings.Replace(str, `max_packet_msg_payload_size = 1024`, `max_packet_msg_payload_size = 10240`, -1)
+		// str = strings.Replace(str, `send_rate = 5120000`, `send_rate = 20000000`, -1)
+		// str = strings.Replace(str, `recv_rate = 5120000`, `recv_rate = 20000000`, -1)
 		// adjust consensus
-		str = strings.Replace(str, `skip_timeout_commit = false`, `skip_timeout_commit = true`, -1)
+		// str = strings.Replace(str, `skip_timeout_commit = false`, `skip_timeout_commit = true`, -1)
+		str = strings.Replace(str, `timeout_propose = "3s"`, `timeout_propose = "1500ms"`, -1)
+		str = strings.Replace(str, `timeout_propose_delta = "500ms"`, `timeout_propose_delta = "250ms"`, -1)
+		str = strings.Replace(str, `timeout_prevote = "1s"`, `timeout_prevote = "500ms"`, -1)
+		str = strings.Replace(str, `timeout_prevote_delta = "500ms"`, `timeout_prevote_delta = "250ms"`, -1)
+		str = strings.Replace(str, `timeout_precommit = "1s"`, `timeout_precommit = "500ms"`, -1)
+		str = strings.Replace(str, `timeout_precommit_delta = "500ms"`, `timeout_precommit_delta = "250ms"`, -1)
+		str = strings.Replace(str, `timeout_commit = "1s"`, `timeout_commit = "100ms"`, -1)
 
 		err = ioutil.WriteFile(configPath, []byte(str), 0644)
 		if err != nil {
