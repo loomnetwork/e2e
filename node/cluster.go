@@ -88,6 +88,9 @@ func CreateCluster(nodes []*Node, account []*Account) error {
 		str = strings.Replace(str, "tcp://127.0.0.1:46658", proxyAppPortAddr, -1)
 		str = strings.Replace(str, "tcp://127.0.0.1:26658", proxyAppPortAddr, -1) //Temp here cause now tendermint is 2xx range
 
+		//TODO we need a better way to update the configs
+		str = strings.Replace(str, "recheck = true", "recheck = false", -1)
+
 		err = ioutil.WriteFile(configPath, []byte(str), 0644)
 		if err != nil {
 			return err
